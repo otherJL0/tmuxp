@@ -45,7 +45,7 @@ def monkeypatch_plugin_test_packages(monkeypatch):
 
 @pytest.fixture(scope="function")
 def socket_name(request):
-    return "tmuxp_test%s" % next(namer)
+    return f"tmuxp_test{next(namer)}"
 
 
 @pytest.fixture(scope="function")
@@ -102,7 +102,7 @@ def session(server):
         pass
 
     for old_test_session in old_test_sessions:
-        logger.debug("Old test test session %s found. Killing it." % old_test_session)
+        logger.debug(f"Old test test session {old_test_session} found. Killing it.")
         server.kill_session(old_test_session)
     assert TEST_SESSION_NAME == session.get("session_name")
     assert TEST_SESSION_NAME != "tmuxp"

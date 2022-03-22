@@ -50,8 +50,8 @@ master_doc = "index"
 project = about["__title__"]
 copyright = about["__copyright__"]
 
-version = "%s" % (".".join(about["__version__"].split("."))[:2])
-release = "%s" % (about["__version__"])
+version = f'{".".join(about["__version__"].split("."))[:2]}'
+release = f'{about["__version__"]}'
 
 exclude_patterns = ["_build"]
 
@@ -107,39 +107,42 @@ copybutton_remove_prompts = True
 rediraffe_redirects = "redirects.txt"
 rediraffe_branch = "master~1"
 
-htmlhelp_basename = "%sdoc" % about["__title__"]
+htmlhelp_basename = f'{about["__title__"]}doc'
 
 latex_documents = [
     (
         "index",
-        "{}.tex".format(about["__package_name__"]),
-        "{} Documentation".format(about["__title__"]),
+        f'{about["__package_name__"]}.tex',
+        f'{about["__title__"]} Documentation',
         about["__author__"],
         "manual",
     )
 ]
 
+
 man_pages = [
     (
         "index",
         about["__package_name__"],
-        "{} Documentation".format(about["__title__"]),
+        f'{about["__title__"]} Documentation',
         about["__author__"],
         1,
     )
 ]
 
+
 texinfo_documents = [
     (
         "index",
-        "{}".format(about["__package_name__"]),
-        "{} Documentation".format(about["__title__"]),
+        f'{about["__package_name__"]}',
+        f'{about["__title__"]} Documentation',
         about["__author__"],
         about["__package_name__"],
         about["__description__"],
         "Miscellaneous",
     )
 ]
+
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/", None),
@@ -153,7 +156,7 @@ aafig_format = dict(latex="pdf", html="gif")
 aafig_default_options = dict(scale=0.75, aspect=0.5, proportional=True)
 
 
-def linkcode_resolve(domain, info):  # NOQA: C901
+def linkcode_resolve(domain, info):    # NOQA: C901
     """
     Determine the URL corresponding to Python object
 
@@ -200,28 +203,14 @@ def linkcode_resolve(domain, info):  # NOQA: C901
     except Exception:
         lineno = None
 
-    if lineno:
-        linespec = "#L%d-L%d" % (lineno, lineno + len(source) - 1)
-    else:
-        linespec = ""
-
+    linespec = "#L%d-L%d" % (lineno, lineno + len(source) - 1) if lineno else ""
     fn = relpath(fn, start=dirname(tmuxp.__file__))
 
     if "dev" in about["__version__"]:
-        return "{}/blob/master/{}/{}{}".format(
-            about["__github__"],
-            about["__package_name__"],
-            fn,
-            linespec,
-        )
+        return f'{about["__github__"]}/blob/master/{about["__package_name__"]}/{fn}{linespec}'
+
     else:
-        return "{}/blob/v{}/{}/{}{}".format(
-            about["__github__"],
-            about["__version__"],
-            about["__package_name__"],
-            fn,
-            linespec,
-        )
+        return f'{about["__github__"]}/blob/v{about["__version__"]}/{about["__package_name__"]}/{fn}{linespec}'
 
 
 def remove_tabs_js(app, exc):

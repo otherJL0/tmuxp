@@ -83,17 +83,10 @@ def test_focus_pane_index(session):
         session.attached_window.show_window_option("pane-base-index", g=True)
     )
 
-    if not pane_base_index:
-        pane_base_index = 0
-    else:
-        pane_base_index = int(pane_base_index)
-
+    pane_base_index = pane_base_index or 0
     # get the pane index for each pane
-    pane_base_indexes = []
-    for pane in session.attached_window.panes:
-        pane_base_indexes.append(int(pane.index))
-
-    pane_indexes_should_be = [pane_base_index + x for x in range(0, 3)]
+    pane_base_indexes = [int(pane.index) for pane in session.attached_window.panes]
+    pane_indexes_should_be = [pane_base_index + x for x in range(3)]
     assert pane_indexes_should_be == pane_base_indexes
 
     w = session.attached_window
@@ -219,7 +212,7 @@ def test_global_options(session):
 
 def test_global_session_env_options(session, monkeypatch):
     visual_silence = "on"
-    monkeypatch.setenv("VISUAL_SILENCE", str(visual_silence))
+    monkeypatch.setenv("VISUAL_SILENCE", visual_silence)
     repeat_time = 738
     monkeypatch.setenv("REPEAT_TIME", str(repeat_time))
     main_pane_height = 8

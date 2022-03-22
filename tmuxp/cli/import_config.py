@@ -48,7 +48,7 @@ def get_teamocil_dir():
 def _resolve_path_no_overwrite(config):
     path = get_abs_path(config)
     if os.path.exists(path):
-        raise click.exceptions.UsageError("%s exists. Pick a new filename." % path)
+        raise click.exceptions.UsageError(f"{path} exists. Pick a new filename.")
     return path
 
 
@@ -86,18 +86,18 @@ def import_config(configfile, importfunc):
         dest = None
         while not dest:
             dest_path = click.prompt(
-                "Save to [%s]" % os.getcwd(), value_proc=_resolve_path_no_overwrite
+                f"Save to [{os.getcwd()}]",
+                value_proc=_resolve_path_no_overwrite,
             )
 
+
             # dest = dest_prompt
-            if click.confirm("Save to %s?" % dest_path):
+            if click.confirm(f"Save to {dest_path}?"):
                 dest = dest_path
 
-        buf = open(dest, "w")
-        buf.write(newconfig)
-        buf.close()
-
-        tmuxp_echo("Saved to %s." % dest)
+        with open(dest, "w") as buf:
+            buf.write(newconfig)
+        tmuxp_echo(f"Saved to {dest}.")
     else:
         tmuxp_echo(
             "tmuxp has examples in JSON and YAML format at "
@@ -140,21 +140,22 @@ def command_convert(confirmed, config):
 
     configparser = kaptan.Kaptan()
     configparser.import_config(config)
-    newfile = config.replace(ext, ".%s" % to_filetype)
+    newfile = config.replace(ext, f".{to_filetype}")
 
     export_kwargs = {"default_flow_style": False} if to_filetype == "yaml" else {}
     newconfig = configparser.export(to_filetype, indent=2, **export_kwargs)
 
-    if not confirmed:
-        if click.confirm(f"convert to <{config}> to {to_filetype}?"):
-            if click.confirm("Save config to %s?" % newfile):
-                confirmed = True
+    if (
+        not confirmed
+        and click.confirm(f"convert to <{config}> to {to_filetype}?")
+        and click.confirm(f"Save config to {newfile}?")
+    ):
+        confirmed = True
 
     if confirmed:
-        buf = open(newfile, "w")
-        buf.write(newconfig)
-        buf.close()
-        print("New config saved to <%s>." % newfile)
+        with open(newfile, "w") as buf:
+            buf.write(newconfig)
+        print(f"New config saved to <{newfile}>.")
 
 
 @command_import.command(

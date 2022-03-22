@@ -75,9 +75,7 @@ def _validate_choices(options):
 
     def func(value):
         if value not in options:
-            raise click.BadParameter(
-                "Possible choices are: {}.".format(", ".join(options))
-            )
+            raise click.BadParameter(f'Possible choices are: {", ".join(options)}.')
         return value
 
     return func
