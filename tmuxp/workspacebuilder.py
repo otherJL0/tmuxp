@@ -91,11 +91,7 @@ class WorkspaceBuilder:
 
         # config.validate_schema(sconf)
 
-        if isinstance(server, Server):
-            self.server = server
-        else:
-            self.server = None
-
+        self.server = server if isinstance(server, Server) else None
         self.sconf = sconf
 
         self.plugins = plugins
@@ -138,8 +134,9 @@ class WorkspaceBuilder:
                     {"session_name": self.sconf["session_name"]}
                 )
                 raise TmuxSessionExists(
-                    "Session name %s is already running." % self.sconf["session_name"]
+                    f'Session name {self.sconf["session_name"]} is already running.'
                 )
+
             else:
                 if "start_directory" in self.sconf:
                     session = self.server.new_session(
@@ -244,11 +241,7 @@ class WorkspaceBuilder:
             that was used to create the window.
         """
         for i, wconf in enumerate(self.sconf["windows"], start=1):
-            if "window_name" not in wconf:
-                window_name = None
-            else:
-                window_name = wconf["window_name"]
-
+            window_name = None if "window_name" not in wconf else wconf["window_name"]
             is_first_window_pass = self.first_window_pass(i, session, append)
 
             w1 = None
@@ -256,16 +249,8 @@ class WorkspaceBuilder:
                 w1 = session.attached_window
                 w1.move_window(99)
 
-            if "start_directory" in wconf:
-                sd = wconf["start_directory"]
-            else:
-                sd = None
-
-            if "window_shell" in wconf:
-                ws = wconf["window_shell"]
-            else:
-                ws = None
-
+            sd = wconf["start_directory"] if "start_directory" in wconf else None
+            ws = wconf["window_shell"] if "window_shell" in wconf else None
             # If the first pane specifies a shell, use that instead.
             try:
                 if wconf["panes"][0]["shell"] != "":

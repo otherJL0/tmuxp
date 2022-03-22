@@ -91,27 +91,22 @@ class TmuxpPlugin:
                 "version": self.tmux_version,
                 "vmin": tmux_min_version,
                 "vmax": tmux_max_version,
-                "incompatible": tmux_version_incompatible
-                if tmux_version_incompatible
-                else [],
+                "incompatible": tmux_version_incompatible or [],
             },
             "libtmux": {
                 "version": self.libtmux_version,
                 "vmin": libtmux_min_version,
                 "vmax": libtmux_max_version,
-                "incompatible": libtmux_version_incompatible
-                if libtmux_version_incompatible
-                else [],
+                "incompatible": libtmux_version_incompatible or [],
             },
             "tmuxp": {
                 "version": self.tmuxp_version,
                 "vmin": tmuxp_min_version,
                 "vmax": tmuxp_max_version,
-                "incompatible": tmuxp_version_incompatible
-                if tmuxp_version_incompatible
-                else [],
+                "incompatible": tmuxp_version_incompatible or [],
             },
         }
+
 
         self._version_check()
 

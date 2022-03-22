@@ -55,24 +55,12 @@ def set_layout_hook(session, hook_name):
     hook_cmd = []
     attached_window = session.attached_window
     for window in session.windows:
-        # unfortunately, select-layout won't work unless
-        # we've literally selected the window at least once
-        # with the client
-        hook_cmd.append(f"selectw -t {window.id}")
-        # edit: removed -t, or else it won't respect main-pane-w/h
-        hook_cmd.append("selectl")
-        hook_cmd.append("selectw -p")
-
-    # unset the hook immediately after executing
-    hook_cmd.append(
-        "set-hook -u -t {target_session} {hook_name}".format(
+        hook_cmd.extend((f"selectw -t {window.id}", "selectl", "selectw -p"))
+    hook_cmd.extend(("set-hook -u -t {target_session} {hook_name}".format(
             target_session=session.id, hook_name=hook_name
-        )
-    )
-    hook_cmd.append(f"selectw -t {attached_window.id}")
-
+        ), f"selectw -t {attached_window.id}"))
     # join the hook's commands with semicolons
-    hook_cmd = "{}".format("; ".join(hook_cmd))
+    hook_cmd = f'{"; ".join(hook_cmd)}'
 
     # append the hook command
     cmd.append(hook_cmd)
@@ -96,8 +84,7 @@ def load_plugins(sconf):
                 plugins.append(plugin())
             except exc.TmuxpPluginException as error:
                 if not click.confirm(
-                    "%sSkip loading %s?"
-                    % (click.style(str(error), fg="yellow"), plugin_name),
+                    f'{click.style(str(error), fg="yellow")}Skip loading {plugin_name}?',
                     default=True,
                 ):
                     click.echo(
@@ -362,7 +349,7 @@ def load_workspace(
             sconf=sconfig, plugins=load_plugins(sconfig), server=t
         )
     except exc.EmptyConfigException:
-        tmuxp_echo("%s is empty or parsed no config data" % config_file, err=True)
+        tmuxp_echo(f"{config_file} is empty or parsed no config data", err=True)
         return
 
     session_name = sconfig["session_name"]
@@ -372,8 +359,7 @@ def load_workspace(
         if not detached and (
             answer_yes
             or click.confirm(
-                "%s is already running. Attach?"
-                % click.style(session_name, fg="green"),
+                f'{click.style(session_name, fg="green")} is already running. Attach?',
                 default=True,
             )
         ):

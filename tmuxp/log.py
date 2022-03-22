@@ -126,7 +126,7 @@ class LogFormatter(logging.Formatter):
         prefix = self.template(record) % record.__dict__
 
         parts = prefix.split(record.message)
-        formatted = prefix + " " + record.message
+        formatted = f'{prefix} {record.message}'
         return formatted.replace("\n", "\n" + parts[0] + " ")
 
 
@@ -185,9 +185,7 @@ def debug_log_template(self, record):
         + "%(lineno)d"
     )
 
-    tpl = reset + levelname + asctime + name + module_funcName + lineno + reset
-
-    return tpl
+    return reset + levelname + asctime + name + module_funcName + lineno + reset
 
 
 class DebugLogFormatter(LogFormatter):

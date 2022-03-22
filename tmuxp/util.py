@@ -58,21 +58,25 @@ def oh_my_zsh_auto_title():
 
     """
 
-    if "SHELL" in os.environ and "zsh" in os.environ.get("SHELL"):
-        if os.path.exists(os.path.expanduser("~/.oh-my-zsh")):
-            # oh-my-zsh exists
-            if (
+    if (
+        "SHELL" in os.environ
+        and "zsh" in os.environ.get("SHELL")
+        and os.path.exists(os.path.expanduser("~/.oh-my-zsh"))
+        and (
+            (
                 "DISABLE_AUTO_TITLE" not in os.environ
                 or os.environ.get("DISABLE_AUTO_TITLE") == "false"
-            ):
-                print(
-                    "Please set:\n\n"
-                    "\texport DISABLE_AUTO_TITLE='true'\n\n"
-                    "in ~/.zshrc or where your zsh profile is stored.\n"
-                    'Remember the "export" at the beginning!\n\n'
-                    "Then create a new shell or type:\n\n"
-                    "\t$ source ~/.zshrc"
-                )
+            )
+        )
+    ):
+        print(
+            "Please set:\n\n"
+            "\texport DISABLE_AUTO_TITLE='true'\n\n"
+            "in ~/.zshrc or where your zsh profile is stored.\n"
+            'Remember the "export" at the beginning!\n\n'
+            "Then create a new shell or type:\n\n"
+            "\t$ source ~/.zshrc"
+        )
 
 
 def raise_if_tmux_not_running(server):
@@ -106,20 +110,26 @@ def get_current_pane(server):
 
 
 def get_session(server, session_name=None, current_pane=None):
-    if session_name:
-        session = server.find_where({"session_name": session_name})
-    elif current_pane is not None:
+    if (
+        not session_name
+        and current_pane is None
+        and (current_pane := get_current_pane(server))
+        or not session_name
+        and current_pane is not None
+    ):
         session = server.find_where({"session_id": current_pane["session_id"]})
-    else:
-        current_pane = get_current_pane(server)
-        if current_pane:
-            session = server.find_where({"session_id": current_pane["session_id"]})
-        else:
-            session = server.list_sessions()[0]
+    elif (
+        not session_name
+        and current_pane is None
+        and not (current_pane := get_current_pane(server))
+    ):
+        session = server.list_sessions()[0]
 
+    else:
+        session = server.find_where({"session_name": session_name})
     if not session:
         if session_name:
-            raise exc.TmuxpException("Session not found: %s" % session_name)
+            raise exc.TmuxpException(f"Session not found: {session_name}")
         else:
             raise exc.TmuxpException("Session not found")
 
@@ -130,7 +140,7 @@ def get_window(session, window_name=None, current_pane=None):
     if window_name:
         window = session.find_where({"window_name": window_name})
         if not window:
-            raise exc.TmuxpException("Window not found: %s" % window_name)
+            raise exc.TmuxpException(f"Window not found: {window_name}")
     elif current_pane is not None:
         window = session.find_where({"window_id": current_pane["window_id"]})
     else:

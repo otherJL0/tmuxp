@@ -92,14 +92,16 @@ def command_freeze(
         save_to = os.path.abspath(
             os.path.join(
                 get_config_dir(),
-                "{}.{}".format(sconf.get("session_name"), config_format or "yaml"),
+                f'{sconf.get("session_name")}.{config_format or "yaml"}',
             )
         )
+
         dest_prompt = click.prompt(
-            "Save to: %s" % save_to, value_proc=get_abs_path, default=save_to
+            f"Save to: {save_to}", value_proc=get_abs_path, default=save_to
         )
+
         if not force and os.path.exists(dest_prompt):
-            print("%s exists. Pick a new filename." % dest_prompt)
+            print(f"{dest_prompt} exists. Pick a new filename.")
             continue
 
         dest = dest_prompt
@@ -124,13 +126,11 @@ def command_freeze(
     elif config_format == "json":
         newconfig = configparser.export("json", indent=2)
 
-    if yes or click.confirm("Save to %s?" % dest):
+    if yes or click.confirm(f"Save to {dest}?"):
         destdir = os.path.dirname(dest)
         if not os.path.isdir(destdir):
             os.makedirs(destdir)
-        buf = open(dest, "w")
-        buf.write(newconfig)
-        buf.close()
-
+        with open(dest, "w") as buf:
+            buf.write(newconfig)
         if not quiet:
-            print("Saved to %s." % dest)
+            print(f"Saved to {dest}.")

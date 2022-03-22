@@ -75,7 +75,7 @@ class AafigDirective(images.Image):
     option_spec.update(own_option_spec)
 
     def run(self):
-        aafig_options = dict()
+        aafig_options = {}
         own_options_keys = [self.own_option_spec.keys()] + ["scale"]
         for (k, v) in self.options.items():
             if k in own_options_keys:
@@ -83,7 +83,7 @@ class AafigDirective(images.Image):
                 if v is None:
                     v = True
                 # convert percentage to float
-                if k == "scale" or k == "aspect":
+                if k in ["scale", "aspect"]:
                     v = float(v) / 100.0
                 aafig_options[k] = v
                 del self.options[k]
@@ -129,7 +129,7 @@ def render_aafig_images(app, doctree):
         try:
             fname, outfn, id, extra = render_aafigure(app, text, options)
         except AafigError as exc:
-            logger.warn("aafigure error: " + str(exc))
+            logger.warn(f"aafigure error: {str(exc)}")
             img.replace_self(nodes.literal_block(text, text))
             continue
         img["uri"] = fname
@@ -151,7 +151,7 @@ def render_aafigure(app, text, options):
         raise AafigError("aafigure module not installed")
 
     fname = get_basename(text, options)
-    fname = "{}.{}".format(get_basename(text, options), options["format"])
+    fname = f'{get_basename(text, options)}.{options["format"]}'
     if app.builder.format == "html":
         # HTML
         imgpath = relative_uri(app.builder.env.docname, "_images")
@@ -168,7 +168,7 @@ def render_aafigure(app, text, options):
             )
         relfn = fname
         outfn = path.join(app.builder.outdir, fname)
-    metadata_fname = "%s.aafig" % outfn
+    metadata_fname = f"{outfn}.aafig"
 
     try:
         if path.isfile(outfn):
@@ -176,11 +176,10 @@ def render_aafigure(app, text, options):
             if options["format"].lower() == "svg":
                 f = None
                 try:
-                    try:
-                        f = open(metadata_fname)
-                        extra = f.read()
-                    except Exception:
-                        raise AafigError()
+                    f = open(metadata_fname)
+                    extra = f.read()
+                except Exception:
+                    raise AafigError()
                 finally:
                     if f is not None:
                         f.close()
@@ -199,10 +198,8 @@ def render_aafigure(app, text, options):
     extra = None
     if options["format"].lower() == "svg":
         extra = visitor.get_size_attrs()
-        f = open(metadata_fname, "w")
-        f.write(extra)
-        f.close()
-
+        with open(metadata_fname, "w") as f:
+            f.write(extra)
     return relfn, outfn, id, extra
 
 

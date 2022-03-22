@@ -82,22 +82,21 @@ def command_shell(
 
     if command is not None:
         exec(command)
+    elif shell == "pdb" or (os.getenv("PYTHONBREAKPOINT") and PY3 and PYMINOR >= 7):
+        from ._compat import breakpoint as tmuxp_breakpoint
+
+        tmuxp_breakpoint()
+        return
     else:
-        if shell == "pdb" or (os.getenv("PYTHONBREAKPOINT") and PY3 and PYMINOR >= 7):
-            from ._compat import breakpoint as tmuxp_breakpoint
+        from ..shell import launch
 
-            tmuxp_breakpoint()
-            return
-        else:
-            from ..shell import launch
-
-            launch(
-                shell=shell,
-                use_pythonrc=use_pythonrc,  # shell: code
-                use_vi_mode=use_vi_mode,  # shell: ptpython, ptipython
-                # tmux environment / libtmux variables
-                server=server,
-                session=session,
-                window=window,
-                pane=pane,
-            )
+        launch(
+            shell=shell,
+            use_pythonrc=use_pythonrc,  # shell: code
+            use_vi_mode=use_vi_mode,  # shell: ptpython, ptipython
+            # tmux environment / libtmux variables
+            server=server,
+            session=session,
+            window=window,
+            pane=pane,
+        )

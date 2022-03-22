@@ -27,18 +27,19 @@ def command_convert(confirmed, config):
 
     configparser = kaptan.Kaptan()
     configparser.import_config(config)
-    newfile = config.replace(ext, ".%s" % to_filetype)
+    newfile = config.replace(ext, f".{to_filetype}")
 
     export_kwargs = {"default_flow_style": False} if to_filetype == "yaml" else {}
     newconfig = configparser.export(to_filetype, indent=2, **export_kwargs)
 
-    if not confirmed:
-        if click.confirm(f"convert to <{config}> to {to_filetype}?"):
-            if click.confirm("Save config to %s?" % newfile):
-                confirmed = True
+    if (
+        not confirmed
+        and click.confirm(f"convert to <{config}> to {to_filetype}?")
+        and click.confirm(f"Save config to {newfile}?")
+    ):
+        confirmed = True
 
     if confirmed:
-        buf = open(newfile, "w")
-        buf.write(newconfig)
-        buf.close()
-        print("New config saved to <%s>." % newfile)
+        with open(newfile, "w") as buf:
+            buf.write(newconfig)
+        print(f"New config saved to <{newfile}>.")

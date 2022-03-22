@@ -187,7 +187,7 @@ def test_resolve_dot(
     assert scan_config("../project") == expect
     assert scan_config("../project/") == expect
     assert scan_config(".tmuxp.yaml") == expect
-    assert scan_config("../../.tmuxp/%s.yaml" % user_config_name) == str(user_config)
+    assert scan_config(f"../../.tmuxp/{user_config_name}.yaml") == str(user_config)
     assert scan_config("myconfig") == str(user_config)
     assert scan_config("~/.tmuxp/myconfig.yaml") == str(user_config)
 
@@ -207,8 +207,8 @@ def test_resolve_dot(
     assert scan_config("work/project/") == expect
     assert scan_config("./work/project") == expect
     assert scan_config("./work/project/") == expect
-    assert scan_config(".tmuxp/%s.yaml" % user_config_name) == str(user_config)
-    assert scan_config("./.tmuxp/%s.yaml" % user_config_name) == str(user_config)
+    assert scan_config(f".tmuxp/{user_config_name}.yaml") == str(user_config)
+    assert scan_config(f"./.tmuxp/{user_config_name}.yaml") == str(user_config)
     assert scan_config("myconfig") == str(user_config)
     assert scan_config("~/.tmuxp/myconfig.yaml") == str(user_config)
 
@@ -229,8 +229,8 @@ def test_resolve_dot(
     assert scan_config("../work/project") == expect
     assert scan_config("../../home/work/project") == expect
     assert scan_config("../work/project/") == expect
-    assert scan_config("%s.yaml" % user_config_name) == str(user_config)
-    assert scan_config("./%s.yaml" % user_config_name) == str(user_config)
+    assert scan_config(f"{user_config_name}.yaml") == str(user_config)
+    assert scan_config(f"./{user_config_name}.yaml") == str(user_config)
     assert scan_config("myconfig") == str(user_config)
     assert scan_config("~/.tmuxp/myconfig.yaml") == str(user_config)
 
@@ -250,8 +250,11 @@ def test_resolve_dot(
     expect = str(project_config)
     assert scan_config("home/work/project") == expect
     assert scan_config("./home/work/project/") == expect
-    assert scan_config("home/.tmuxp/%s.yaml" % user_config_name) == str(user_config)
-    assert scan_config("./home/.tmuxp/%s.yaml" % user_config_name) == str(user_config)
+    assert scan_config(f"home/.tmuxp/{user_config_name}.yaml") == str(user_config)
+    assert scan_config(f"./home/.tmuxp/{user_config_name}.yaml") == str(
+        user_config
+    )
+
     assert scan_config("myconfig") == str(user_config)
     assert scan_config("~/.tmuxp/myconfig.yaml") == str(user_config)
 

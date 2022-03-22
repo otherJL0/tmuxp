@@ -81,8 +81,12 @@ def test_scan_config(tmp_path: pathlib.Path):
     garbage_file.write_text("wat", encoding="utf-8")
 
     for r, d, f in os.walk(str(tmp_path)):
-        for filela in (x for x in f if x.endswith((".json", ".ini", "yaml"))):
-            configs.append(str(tmp_path / filela))
+        configs.extend(
+            str(tmp_path / filela)
+            for filela in (
+                x for x in f if x.endswith((".json", ".ini", "yaml"))
+            )
+        )
 
     files = 0
     config_json = tmp_path / "config.json"
@@ -392,18 +396,19 @@ def test_replaces_env_variables(monkeypatch):
 
     sconfig = load_yaml(yaml_config)
 
-    monkeypatch.setenv(str(env_key), str(env_val))
+    monkeypatch.setenv(env_key, env_val)
     sconfig = config.expand(sconfig)
-    assert "%s/test" % env_val == sconfig["start_directory"]
+    assert f"{env_val}/test" == sconfig["start_directory"]
     assert (
-        "%s/test2" % env_val
+        f"{env_val}/test2"
         in sconfig["shell_command_before"]["shell_command"][0]["cmd"]
     )
-    assert "%s/test3" % env_val == sconfig["before_script"]
-    assert "hi - %s" % env_val == sconfig["session_name"]
-    assert "%s/moo" % env_val == sconfig["global_options"]["default-shell"]
-    assert "%s/lol" % env_val == sconfig["options"]["default-command"]
-    assert "logging @ %s" % env_val == sconfig["windows"][1]["window_name"]
+
+    assert f"{env_val}/test3" == sconfig["before_script"]
+    assert f"hi - {env_val}" == sconfig["session_name"]
+    assert f"{env_val}/moo" == sconfig["global_options"]["default-shell"]
+    assert f"{env_val}/lol" == sconfig["options"]["default-command"]
+    assert f"logging @ {env_val}" == sconfig["windows"][1]["window_name"]
 
 
 def test_plugins():

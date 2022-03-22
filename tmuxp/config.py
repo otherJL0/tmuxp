@@ -38,9 +38,10 @@ def validate_schema(session_config):
         if "window_name" not in window:
             raise exc.ConfigError('config window is missing "window_name"')
 
-    if "plugins" in session_config:
-        if not isinstance(session_config["plugins"], list):
-            raise exc.ConfigError('"plugins" only supports list type')
+    if "plugins" in session_config and not isinstance(
+        session_config["plugins"], list
+    ):
+        raise exc.ConfigError('"plugins" only supports list type')
 
     return True
 
@@ -81,13 +82,12 @@ def in_dir(
     -------
     list
     """
-    configs = []
-
-    for filename in os.listdir(config_dir):
-        if is_config_file(filename, extensions) and not filename.startswith("."):
-            configs.append(filename)
-
-    return configs
+    return [
+        filename
+        for filename in os.listdir(config_dir)
+        if is_config_file(filename, extensions)
+        and not filename.startswith(".")
+    ]
 
 
 def in_cwd():
@@ -101,13 +101,11 @@ def in_cwd():
     list
         configs in current working directory
     """
-    configs = []
-
-    for filename in os.listdir(os.getcwd()):
-        if filename.startswith(".tmuxp") and is_config_file(filename):
-            configs.append(filename)
-
-    return configs
+    return [
+        filename
+        for filename in os.listdir(os.getcwd())
+        if filename.startswith(".tmuxp") and is_config_file(filename)
+    ]
 
 
 def expandshell(_path):
@@ -150,7 +148,7 @@ def inline(session_config):
     ):
         session_config["shell_command"] = session_config["shell_command"][0]
 
-        if len(session_config.keys()) == int(1):
+        if len(session_config.keys()) == 1:
             session_config = session_config["shell_command"]
     if (
         "shell_command_before" in session_config
@@ -187,12 +185,15 @@ def expand_cmd(p: Dict) -> Dict:
         if isinstance(p["shell_command"], str):
             cmds = [cmds]
 
-        if not cmds or any(a == cmds for a in [None, "blank", "pane"]):
+        if not cmds or cmds in [None, "blank", "pane"]:
             cmds = []
 
-        if isinstance(cmds, list) and len(cmds) == int(1):
-            if any(a in cmds for a in [None, "blank", "pane"]):
-                cmds = []
+        if (
+            isinstance(cmds, list)
+            and len(cmds) == 1
+            and any(a in cmds for a in [None, "blank", "pane"])
+        ):
+            cmds = []
 
         for cmd_idx, cmd in enumerate(cmds):
             if isinstance(cmd, str):
@@ -364,19 +365,20 @@ def trickle(session_config):
         if session_start_directory:
             if "start_directory" not in window_config:
                 window_config["start_directory"] = session_start_directory
-            else:
-                if not any(
+            elif not any(
                     window_config["start_directory"].startswith(a) for a in ["~", "/"]
                 ):
-                    window_start_path = os.path.join(
-                        session_start_directory, window_config["start_directory"]
-                    )
-                    window_config["start_directory"] = window_start_path
+                window_start_path = os.path.join(
+                    session_start_directory, window_config["start_directory"]
+                )
+                window_config["start_directory"] = window_start_path
 
         # We only need to trickle to the window, workspace builder checks wconf
-        if suppress_history is not None:
-            if "suppress_history" not in window_config:
-                window_config["suppress_history"] = suppress_history
+        if (
+            suppress_history is not None
+            and "suppress_history" not in window_config
+        ):
+            window_config["suppress_history"] = suppress_history
 
         # If panes were NOT specified for a window, assume that a single pane
         # with no shell commands is desired
@@ -457,15 +459,17 @@ def import_tmuxinator(session_config):
     if "tabs" in session_config:
         session_config["windows"] = session_config.pop("tabs")
 
-    if "pre" in session_config and "pre_window" in session_config:
-        tmuxp_config["shell_command"] = session_config["pre"]
+    if "pre" in session_config:
+        if "pre_window" in session_config:
+            tmuxp_config["shell_command"] = session_config["pre"]
 
-        if isinstance(session_config["pre"], str):
-            tmuxp_config["shell_command_before"] = [session_config["pre_window"]]
-        else:
-            tmuxp_config["shell_command_before"] = session_config["pre_window"]
-    elif "pre" in session_config:
-        if isinstance(session_config["pre"], str):
+            tmuxp_config["shell_command_before"] = (
+                [session_config["pre_window"]]
+                if isinstance(session_config["pre"], str)
+                else session_config["pre_window"]
+            )
+
+        elif isinstance(session_config["pre"], str):
             tmuxp_config["shell_command_before"] = [session_config["pre"]]
         else:
             tmuxp_config["shell_command_before"] = session_config["pre"]
@@ -474,8 +478,9 @@ def import_tmuxinator(session_config):
         if "shell_command_before" not in tmuxp_config:
             tmuxp_config["shell_command_before"] = []
         tmuxp_config["shell_command_before"].append(
-            "rbenv shell %s" % session_config["rbenv"]
+            f'rbenv shell {session_config["rbenv"]}'
         )
+
 
     for window_config in session_config["windows"]:
         for k, v in window_config.items():
